@@ -1,9 +1,14 @@
 from datetime import UTC, datetime, timedelta
-
-from jose import jwt
+from uuid import uuid4
+from jose import JWTError, jwt
 from pwdlib import PasswordHash
 
 from app.core.config import settings
+from fastapi.security import HTTPBearer
+
+bearer_scheme = HTTPBearer(
+    auto_error=True
+)
 
 password_hash = PasswordHash.recommended()
 
@@ -34,19 +39,37 @@ def create_access_token(subject: str) -> str:
     )
 
 
-def create_refresh_token(subject: str) -> str:
+def create_refresh_token(subject: str):
     expire = datetime.now(UTC) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
 
+    jti = str(uuid4())
+
     payload = {
         "sub": subject,
-        "exp": expire,
+        "jti": jti,
         "type": "refresh",
+        "exp": expire,
     }
 
-    return jwt.encode(
+    token = jwt.encode(
         payload,
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
+
+    return token, jti, expire
+
+
+
+
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+    except JWTError:
+        raise ValueError("Invalid token")

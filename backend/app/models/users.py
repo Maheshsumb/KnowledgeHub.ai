@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column,relationship
 
 from app.databases.base import Base
 from app.databases.mixins import TimestampMixin, UUIDMixin
@@ -25,4 +25,9 @@ class User(UUIDMixin, TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
+    )
+    refresh_tokens = relationship(
+    "RefreshToken",
+    back_populates="user",
+    cascade="all, delete-orphan",
     )
