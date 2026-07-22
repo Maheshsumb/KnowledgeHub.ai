@@ -7,6 +7,8 @@ from app.api.v1.organizations import router as organization_router
 from app.core.exception_handlers import register_exception_handlers
 from app.core.config import settings
 from app.api.v1.membership import router as membership_router
+from app.api.v1.workspaces import router as workspaces_router
+from app.api.v1.documents import router as documents_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -26,6 +28,8 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(organization_router, prefix="/api/v1")
 app.include_router(membership_router, prefix="/api/v1")
+app.include_router(workspaces_router, prefix="/api/v1")
+app.include_router(documents_router, prefix="/api/v1")
 register_exception_handlers(app)
 
 @app.get("/")

@@ -41,3 +41,6 @@ class User(UUIDMixin, TimestampMixin, Base):
     back_populates="user",
     cascade="all, delete-orphan",
     )
+    uploaded_documents = relationship(
+    "Document",
+)

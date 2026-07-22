@@ -6,4 +6,10 @@ class OrganizationRole(str, Enum):
     ADMIN = "ADMIN"
     MEMBER = "MEMBER"
     VIEWER = "VIEWER"
-    
+
+
+class DocumentStatus(str, Enum):
+    UPLOADING = "UPLOADING"
+    PROCESSING = "PROCESSING"
+    READY = "READY"
+    FAILED = "FAILED"

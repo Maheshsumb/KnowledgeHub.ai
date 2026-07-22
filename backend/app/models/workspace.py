@@ -52,6 +52,12 @@ class Workspace(Base, TimestampMixin):
         back_populates="workspaces",
     )
 
+    documents = relationship(
+    "Document",
+    back_populates="workspace",
+    cascade="all, delete-orphan",
+)
+
     def __repr__(self) -> str:
         return (
             f"<Workspace(id={self.id}, "

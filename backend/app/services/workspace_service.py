@@ -53,19 +53,17 @@ class WorkspaceService:
                 "Workspace already exists."
             )
 
-        async with self.db.begin():
+        workspace = Workspace(
+            organization_id=organization_id,
+            name=name,
+            slug=slug,
+            description=description,
+        )
 
-            workspace = Workspace(
-                organization_id=organization_id,
-                name=name,
-                slug=slug,
-                description=description,
-            )
-
-            await self.workspace_repo.create(
-                workspace
-            )
-
+        await self.workspace_repo.create(
+            workspace
+        )
+        await self.db.commit()
         await self.db.refresh(workspace)
 
         return workspace
