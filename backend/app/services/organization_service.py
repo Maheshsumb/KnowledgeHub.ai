@@ -44,15 +44,24 @@ class OrganizationService:
                 name=name,
                 slug=slug,
                 description=description,
-            owner_id=owner_id,
-    )
+                owner_id=owner_id,
+            )
 
-        await self.organization_repo.create(organization)
-        membership = Membership(
-            user_id=owner_id,
-            organization_id=organization.id,
-            role=OrganizationRole.OWNER,
-    )
-        await self.membership_repo.create(membership)
+            await self.organization_repo.create(organization)
+            membership = Membership(
+                user_id=owner_id,
+                organization_id=organization.id,
+                role=OrganizationRole.OWNER,
+            )
+            await self.membership_repo.create(membership)
+            
         await self.db.refresh(organization)
         return organization
+
+    async def add_member(
+        self,
+        organization_id,
+        user_id,
+        role,
+    ):
+        pass

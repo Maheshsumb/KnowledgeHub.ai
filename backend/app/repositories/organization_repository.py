@@ -32,3 +32,15 @@ class OrganizationRepository:
             )
         )
         return result.scalars().all()
+    
+    async def get_by_id(
+    self,
+    organization_id,
+):
+        result = await self.db.execute(
+            select(Organization).where(
+                Organization.id == organization_id
+            )
+        )
+
+        return result.scalar_one_or_none()

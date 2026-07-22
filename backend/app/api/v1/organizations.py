@@ -55,3 +55,4 @@ async def list_organizations(
     return await service.list_user_organizations(
         current_user.id
     )
+
