@@ -8,6 +8,16 @@ from app.databases.session import get_db
 router = APIRouter(prefix="/health", tags=["Health"])
 
 
+from app.core.config import settings
+
+@router.get("")
+def health():
+    return {
+        "status": "healthy",
+        "service": settings.APP_NAME,
+        "version": settings.APP_VERSION
+    }
+
 @router.get("/db")
 async def db_health(db: AsyncSession = Depends(get_db)):
     try:
