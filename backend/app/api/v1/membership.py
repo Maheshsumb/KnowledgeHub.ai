@@ -11,6 +11,7 @@ from app.repositories.membership_repository import MembershipRepository
 from app.repositories.organization_repository import OrganizationRepository
 from app.schemas.membership import (
     MembershipCreate,
+    MembershipUpdate,
     MembershipResponse,
 )
 from app.services.membership_service import MembershipService
@@ -101,4 +102,32 @@ async def remove_member(
 
     return Response(
         status_code=status.HTTP_204_NO_CONTENT,
+    )
+
+@router.patch(
+    "/{organization_id}/members/{user_id}",
+    response_model=MembershipResponse,
+    summary="Update a member's role",
+    description="Allows an Owner or Admin to update a member's role.",
+)
+async def update_member_role(
+    organization_id: UUID,
+    user_id: UUID,
+    request: MembershipUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_membership: Membership = Depends(
+        require_role(OrganizationRole.ADMIN)
+    ),
+):
+    service = MembershipService(
+        db=db,
+        membership_repo=MembershipRepository(db),
+        organization_repo=OrganizationRepository(db),
+    )
+
+    return await service.update_role(
+        organization_id=organization_id,
+        target_user_id=user_id,
+        current_user_id=current_membership.user_id,
+        new_role=request.role,
     )

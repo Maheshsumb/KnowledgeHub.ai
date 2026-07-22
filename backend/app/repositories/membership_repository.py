@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.membership import Membership
 
 
+from sqlalchemy.orm import joinedload
+
 class MembershipRepository:
 
     def __init__(self, db: AsyncSession):
@@ -33,13 +35,14 @@ class MembershipRepository:
 
         return result.scalar_one_or_none()
 
-
     async def list_members(
         self,
         organization_id,
     ):
         result = await self.db.execute(
-            select(Membership).where(
+            select(Membership)
+            .options(joinedload(Membership.user))
+            .where(
                 Membership.organization_id == organization_id
             )
         )
@@ -64,7 +67,6 @@ class MembershipRepository:
         )
 
         return result.scalar_one_or_none()
-
 
     async def get_by_user_and_organization(
         self,

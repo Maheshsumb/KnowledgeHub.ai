@@ -133,3 +133,45 @@ class MembershipService:
         await self.db.commit()
 
         return None
+
+    async def update_role(
+        self,
+        organization_id: UUID,
+        target_user_id: UUID,
+        current_user_id: UUID,
+        new_role: OrganizationRole,
+    ):
+        current_membership = await self.membership_repo.get_by_user_and_organization(
+            current_user_id,
+            organization_id,
+        )
+
+        target_membership = await self.membership_repo.get_by_user_and_organization(
+            target_user_id,
+            organization_id,
+        )
+
+        if target_membership is None:
+            raise UserNotFoundError("Member not found.")
+
+        ROLE_HIERARCHY = {
+            OrganizationRole.OWNER: 4,
+            OrganizationRole.ADMIN: 3,
+            OrganizationRole.MEMBER: 2,
+            OrganizationRole.VIEWER: 1,
+        }
+
+        current_level = ROLE_HIERARCHY[current_membership.role]
+        target_level = ROLE_HIERARCHY[target_membership.role]
+        new_level = ROLE_HIERARCHY[new_role]
+
+        if current_membership.role != OrganizationRole.OWNER:
+            if current_level <= target_level:
+                raise UnauthorizedOrganizationAccessError("Cannot modify a user with equal or higher role.")
+            if current_level <= new_level:
+                raise UnauthorizedOrganizationAccessError("Cannot promote a user to a role equal or higher than yours.")
+
+        target_membership.role = new_role
+        await self.db.commit()
+        await self.db.refresh(target_membership)
+        return target_membership
