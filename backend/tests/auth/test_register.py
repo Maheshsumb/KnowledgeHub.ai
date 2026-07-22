@@ -37,8 +37,8 @@ async def test_register_duplicate_email(client: AsyncClient, test_user):
             "full_name": "Duplicate User"
         }
     )
-    assert response.status_code == 400
-    assert "already registered" in response.json()["detail"].lower()
+    assert response.status_code == 409
+    assert "email already exists" in response.json()["error"]["message"].lower()
 
 @pytest.mark.asyncio
 async def test_register_weak_password(client: AsyncClient):

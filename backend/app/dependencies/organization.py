@@ -20,9 +20,9 @@ async def get_current_membership(
     db: AsyncSession = Depends(get_db),
 ) -> Membership:
 
-    membership = await MembershipRepository(
-        db
-    ).get_user_membership(
+    repo = MembershipRepository(db)
+
+    membership = await repo.get_user_membership(
         user_id=current_user.id,
         organization_id=organization_id,
     )

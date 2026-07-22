@@ -40,3 +40,12 @@ class UnauthorizedOrganizationAccessError(AppException):
 
 class UserAlreadyInOrganizationError(AppException):
     pass
+
+class WorkspaceAlreadyExistsError(AppException):
+    status_code = 409
+    error_code = "WORKSPACE_ALREADY_EXISTS"
+
+
+class WorkspaceNotFoundError(AppException):
+    status_code = 404
+    error_code = "WORKSPACE_NOT_FOUND"

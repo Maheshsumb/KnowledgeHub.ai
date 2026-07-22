@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from app.models.workspace import Workspace
 from app.databases.base import Base
 from app.databases.mixins import TimestampMixin, UUIDMixin
 
@@ -48,3 +48,8 @@ class Organization(UUIDMixin, TimestampMixin, Base):
     back_populates="organization",
     cascade="all, delete-orphan",
     )
+    workspaces = relationship(
+    "Workspace",
+    back_populates="organization",
+    cascade="all, delete-orphan",
+)

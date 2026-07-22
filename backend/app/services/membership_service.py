@@ -52,18 +52,18 @@ class MembershipService:
                 "User is already a member of this organization."
             )
 
-        async with self.db.begin():
 
-            membership = Membership(
-                user_id=user_id,
-                organization_id=organization_id,
-                role=role,
-            )
+        membership = Membership(
+            user_id=user_id,
+            organization_id=organization_id,
+            role=role,
+        )
 
-            await self.membership_repo.create(
-                membership
-            )
+        await self.membership_repo.create(
+            membership
+        )
 
+        await self.db.commit()
         await self.db.refresh(membership)
 
         return membership
@@ -127,9 +127,9 @@ class MembershipService:
                 "You cannot remove a user with an equal or higher role."
             )
 
-        async with self.db.begin():
-            await self.membership_repo.delete(
-                target_membership
-            )
+        await self.membership_repo.delete(
+            target_membership
+        )
+        await self.db.commit()
 
         return None
