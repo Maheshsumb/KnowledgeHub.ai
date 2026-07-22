@@ -49,3 +49,19 @@ class WorkspaceAlreadyExistsError(AppException):
 class WorkspaceNotFoundError(AppException):
     status_code = 404
     error_code = "WORKSPACE_NOT_FOUND"
+
+
+class DocumentNotFoundError(Exception):
+    """Raised when a document cannot be found."""
+
+
+class InvalidDocumentError(Exception):
+    """Raised when an uploaded document is invalid."""
+
+
+class UnsupportedDocumentTypeError(Exception):
+    """Raised when file type is unsupported."""
+
+
+class DocumentAlreadyExistsError(Exception):
+    """Raised when duplicate document exists."""

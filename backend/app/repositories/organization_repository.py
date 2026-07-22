@@ -44,3 +44,11 @@ class OrganizationRepository:
         )
 
         return result.scalar_one_or_none()
+
+    async def update(self, organization: Organization) -> Organization:
+        await self.db.flush()
+        return organization
+
+    async def delete(self, organization: Organization) -> None:
+        await self.db.delete(organization)
+        await self.db.flush()
