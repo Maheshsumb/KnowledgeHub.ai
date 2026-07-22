@@ -28,3 +28,15 @@ class UserNotFoundError(AppException):
 
 class WeakPasswordError(AppException):
     pass
+
+class OrganizationAlreadyExistsError(AppException):
+    pass
+
+class OrganizationNotFoundError(AppException):
+    pass
+
+class UnauthorizedOrganizationAccessError(AppException):
+    pass
+
+class UserAlreadyInOrganizationError(AppException):
+    pass

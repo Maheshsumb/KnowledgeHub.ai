@@ -43,3 +43,8 @@ class Organization(UUIDMixin, TimestampMixin, Base):
         "User",
         back_populates="owned_organizations",
     )
+    memberships = relationship(
+    "Membership",
+    back_populates="organization",
+    cascade="all, delete-orphan",
+    )

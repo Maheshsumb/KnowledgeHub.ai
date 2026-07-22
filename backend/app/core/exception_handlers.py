@@ -8,6 +8,10 @@ from app.core.exceptions import (
     PasswordMismatchError,
     UserNotFoundError,
     WeakPasswordError,
+    OrganizationAlreadyExistsError,
+    OrganizationNotFoundError,
+    UnauthorizedOrganizationAccessError,
+    UserAlreadyInOrganizationError,
 )
 
 
@@ -125,3 +129,63 @@ def register_exception_handlers(app: FastAPI):
             },
         },
     ) 
+    @app.exception_handler(OrganizationAlreadyExistsError)
+    async def organization_already_exists_handler(
+        request: Request,
+        exc: OrganizationAlreadyExistsError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "success": False,
+                "error": {
+                    "code": "ORGANIZATION_ALREADY_EXISTS",
+                    "message": exc.message,
+                },
+            },
+        )
+    @app.exception_handler(OrganizationNotFoundError)
+    async def organization_not_found_handler(
+        request: Request,
+        exc: OrganizationNotFoundError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "success": False,
+                "error": {
+                    "code": "ORGANIZATION_NOT_FOUND",
+                    "message": exc.message,
+                },
+            },
+        )
+    @app.exception_handler(UnauthorizedOrganizationAccessError)
+    async def unauthorized_organization_access_handler(
+        request: Request,
+        exc: UnauthorizedOrganizationAccessError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "success": False,
+                "error": {
+                    "code": "UNAUTHORIZED_ORGANIZATION_ACCESS",
+                    "message": exc.message,
+                },
+            },
+        )
+    @app.exception_handler(UserAlreadyInOrganizationError)
+    async def user_already_in_organization_handler(
+        request: Request,
+        exc: UserAlreadyInOrganizationError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "success": False,
+                "error": {
+                    "code": "USER_ALREADY_IN_ORGANIZATION",
+                    "message": exc.message,
+                },
+            },
+        )
