@@ -49,7 +49,9 @@ async def list_organizations(
 ):
 
     service = OrganizationService(
-        OrganizationRepository(db)
+        db=db,
+        organization_repo=OrganizationRepository(db),
+        membership_repo=MembershipRepository(db),
     )
 
     return await service.list_user_organizations(

@@ -11,13 +11,13 @@ class MembershipRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-async def create(
-    self,
-    membership: Membership,
-) -> Membership:
-    self.db.add(membership)
-    await self.db.flush()
-    return membership
+    async def create(
+        self,
+        membership: Membership,
+    ) -> Membership:
+        self.db.add(membership)
+        await self.db.flush()
+        return membership
 
     async def get_membership(
         self,
@@ -40,11 +40,10 @@ async def create(
     ):
         result = await self.db.execute(
             select(Membership).where(
-            Membership.organization_id == organization_id
+                Membership.organization_id == organization_id
+            )
         )
-    )
-
-    return result.scalars().all()
+        return result.scalars().all()
 
     async def delete(
         self,
@@ -52,31 +51,31 @@ async def create(
     ):
         await self.db.delete(membership)
 
-async def get_user_membership(
-    self,
-    user_id: UUID,
-    organization_id: UUID,
-):
-    result = await self.db.execute(
-        select(Membership).where(
-            Membership.user_id == user_id,
-            Membership.organization_id == organization_id,
+    async def get_user_membership(
+        self,
+        user_id: UUID,
+        organization_id: UUID,
+    ):
+        result = await self.db.execute(
+            select(Membership).where(
+                Membership.user_id == user_id,
+                Membership.organization_id == organization_id,
+            )
         )
-    )
 
-    return result.scalar_one_or_none()
+        return result.scalar_one_or_none()
 
 
-async def get_by_user_and_organization(
-    self,
-    user_id,
-    organization_id,
-):
-    result = await self.db.execute(
-        select(Membership).where(
-            Membership.user_id == user_id,
-            Membership.organization_id == organization_id,
+    async def get_by_user_and_organization(
+        self,
+        user_id,
+        organization_id,
+    ):
+        result = await self.db.execute(
+            select(Membership).where(
+                Membership.user_id == user_id,
+                Membership.organization_id == organization_id,
+            )
         )
-    )
 
-    return result.scalar_one_or_none()
+        return result.scalar_one_or_none()
