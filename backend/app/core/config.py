@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+    CHROMA_DB_PATH: str = "storage/chroma_db"
+    CHROMA_COLLECTION: str = "knowledgehub"
+
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     class Config:
         env_file = ".env"

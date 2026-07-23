@@ -84,3 +84,12 @@ class DocumentRepository:
 
         await self.db.delete(document)
         await self.db.flush()
+
+async def update(self, document: Document) -> Document:
+    """
+    Persist document changes.
+    """
+    self.db.add(document)
+    await self.db.flush()
+    await self.db.refresh(document)
+    return document

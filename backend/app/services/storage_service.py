@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 from fastapi import UploadFile
 
-
+from app.core.exceptions import UnsupportedDocumentTypeError
 class StorageService:
 
     STORAGE_ROOT = Path("storage/documents")
@@ -15,6 +15,8 @@ class StorageService:
         "application/pdf",
         "text/plain",
         "text/markdown",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }
 
     MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
@@ -33,7 +35,7 @@ class StorageService:
     ) -> tuple[str, int, str]:
 
         if file.content_type not in self.ALLOWED_CONTENT_TYPES:
-            raise ValueError("Unsupported document type.")
+            raise UnsupportedDocumentTypeError("Unsupported document type.")
 
         data = await file.read()
 

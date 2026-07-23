@@ -1,5 +1,9 @@
 from uuid import UUID, uuid4
+from app.services.ingestion.loader_service import DocumentLoaderService
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from app.models.document_chunk import DocumentChunk
 from sqlalchemy import (
     Enum,
     ForeignKey,
@@ -104,6 +108,11 @@ class Document(Base, TimestampMixin):
     uploader = relationship(
         "User",
     )
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
+    "DocumentChunk",
+    back_populates="document",
+    cascade="all, delete-orphan",
+)
 
     def __repr__(self) -> str:
         return (

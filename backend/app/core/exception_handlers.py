@@ -12,6 +12,12 @@ from app.core.exceptions import (
     OrganizationNotFoundError,
     UnauthorizedOrganizationAccessError,
     UserAlreadyInOrganizationError,
+    WorkspaceNotFoundError,
+    WorkspaceAlreadyExistsError,
+    DocumentNotFoundError,
+    DocumentAlreadyExistsError,
+    InvalidDocumentError,
+    UnsupportedDocumentTypeError,
 )
 
 
@@ -190,6 +196,102 @@ def register_exception_handlers(app: FastAPI):
                 "error": {
                     "code": "USER_ALREADY_IN_ORGANIZATION",
                     "message": exc.message,
+                },
+            },
+        )
+
+    @app.exception_handler(WorkspaceNotFoundError)
+    async def workspace_not_found_handler(
+        request: Request,
+        exc: WorkspaceNotFoundError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "success": False,
+                "error": {
+                    "code": "WORKSPACE_NOT_FOUND",
+                    "message": exc.message,
+                },
+            },
+        )
+
+    @app.exception_handler(DocumentNotFoundError)
+    async def document_not_found_handler(
+        request: Request,
+        exc: DocumentNotFoundError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "success": False,
+                "error": {
+                    "code": "DOCUMENT_NOT_FOUND",
+                    "message": str(exc),
+                },
+            },
+        )
+
+    @app.exception_handler(DocumentAlreadyExistsError)
+    async def document_already_exists_handler(
+        request: Request,
+        exc: DocumentAlreadyExistsError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "success": False,
+                "error": {
+                    "code": "DOCUMENT_ALREADY_EXISTS",
+                    "message": str(exc),
+                },
+            },
+        )
+
+    @app.exception_handler(WorkspaceAlreadyExistsError)
+    async def workspace_already_exists_handler(
+        request: Request,
+        exc: WorkspaceAlreadyExistsError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "success": False,
+                "error": {
+                    "code": "WORKSPACE_ALREADY_EXISTS",
+                    "message": exc.message,
+                },
+            },
+        )
+
+    @app.exception_handler(InvalidDocumentError)
+    async def invalid_document_handler(
+        request: Request,
+        exc: InvalidDocumentError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "success": False,
+                "error": {
+                    "code": "INVALID_DOCUMENT",
+                    "message": str(exc),
+                },
+            },
+        )
+
+    @app.exception_handler(UnsupportedDocumentTypeError)
+    async def unsupported_document_type_handler(
+        request: Request,
+        exc: UnsupportedDocumentTypeError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            content={
+                "success": False,
+                "error": {
+                    "code": "UNSUPPORTED_DOCUMENT_TYPE",
+                    "message": str(exc),
                 },
             },
         )

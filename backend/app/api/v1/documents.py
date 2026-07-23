@@ -18,6 +18,8 @@ from app.repositories.document_repository import DocumentRepository
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.document import DocumentResponse
 from app.services.document_service import DocumentService
+from app.services.ingestion.loader_service import DocumentLoaderService
+from app.services.storage_service import StorageService
 
 
 router = APIRouter(
@@ -30,11 +32,7 @@ def get_document_service(
     db: AsyncSession = Depends(get_db),
 ) -> DocumentService:
 
-    return DocumentService(
-        db=db,
-        document_repo=DocumentRepository(db),
-        workspace_repo=WorkspaceRepository(db),
-    )
+    return DocumentService(db=db)
 
 
 @router.get(
