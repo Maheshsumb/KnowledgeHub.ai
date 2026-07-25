@@ -1,4 +1,5 @@
-from typing import Iterator
+import json
+from typing import AsyncIterator
 from uuid import UUID
 
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -22,7 +23,7 @@ class ChatService:
       4. Rewrite follow-up question into a standalone question (for retrieval)
       5. Delegate to RAGService (retrieval + prompting + generation)
       6. Persist user and assistant messages
-      7. If first message → generate and save conversation title (background)
+      7. If first message - generate and save conversation title (background)
       8. Return the response
 
     Flow (stream_chat):
@@ -46,9 +47,9 @@ class ChatService:
         self.question_rewriter = question_rewriter
         self.title_generator = title_generator
 
-    # ── Shared pre-processing ─────────────────────────────────────────────────
+    # ── Shared pre-processing ──────────────────────────────────────────────────
 
-    def _prepare(
+    async def _prepare(
         self,
         request: ChatRequest,
         user_id: UUID,
@@ -57,13 +58,13 @@ class ChatService:
 
         Returns (history_text, rewritten_question, is_first_message).
         """
-        self.conversation_service.verify_ownership(
+        await self.conversation_service.verify_ownership(
             conversation_id=request.conversation_id,
             user_id=user_id,
             workspace_id=request.workspace_id,
         )
 
-        history = self.message_service.list_recent_messages(
+        history = await self.message_service.get_history(
             conversation_id=request.conversation_id,
             limit=10,
         )
@@ -79,18 +80,18 @@ class ChatService:
 
         return history_text, rewritten_question, is_first_message
 
-    def _persist(
+    async def _persist(
         self,
         request: ChatRequest,
         answer: str,
     ) -> None:
-        """Best-effort message persistence — does not raise on failure."""
+        """Best-effort message persistence - does not raise on failure."""
         try:
-            self.message_service.save_user_message(
+            await self.message_service.save_user_message(
                 conversation_id=request.conversation_id,
                 content=request.question,
             )
-            self.message_service.save_assistant_message(
+            await self.message_service.save_assistant_message(
                 conversation_id=request.conversation_id,
                 content=answer,
             )
@@ -100,7 +101,7 @@ class ChatService:
                 f"{request.conversation_id}: {e}"
             )
 
-    def _maybe_set_title(
+    async def _maybe_set_title(
         self,
         request: ChatRequest,
         is_first_message: bool,
@@ -111,7 +112,7 @@ class ChatService:
 
         try:
             title = self.title_generator.generate(question=request.question)
-            self.conversation_service.update_title(
+            await self.conversation_service.update_title(
                 conversation_id=request.conversation_id,
                 title=title,
             )
@@ -127,7 +128,7 @@ class ChatService:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def chat(
+    async def chat(
         self,
         request: ChatRequest,
         user_id: UUID,
@@ -140,7 +141,7 @@ class ChatService:
         BackgroundTask when background_title=True, so the title is generated
         without blocking the HTTP response.
         """
-        history_text, rewritten_question, is_first_message = self._prepare(
+        history_text, rewritten_question, is_first_message = await self._prepare(
             request=request,
             user_id=user_id,
         )
@@ -153,32 +154,32 @@ class ChatService:
             history=history_text,
         )
 
-        self._persist(request=request, answer=response.answer)
+        await self._persist(request=request, answer=response.answer)
 
         if not background_title:
-            self._maybe_set_title(
+            await self._maybe_set_title(
                 request=request,
                 is_first_message=is_first_message,
             )
 
         return response, is_first_message
 
-    def stream_chat(
+    async def stream_chat(
         self,
         request: ChatRequest,
         user_id: UUID,
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
         """
         Yield SSE-formatted tokens from the LLM, then persist messages and
         optionally auto-title the conversation.
 
         SSE format:
-          data: <token>\\n\\n          — each content token
-          event: done\\ndata: complete\\n\\n  — signals end of stream
-          event: error\\ndata: <msg>\\n\\n   — on failure
+          data: <token>\\n\\n          - each content token
+          event: done\\ndata: complete\\n\\n  - signals end of stream
+          event: error\\ndata: <msg>\\n\\n   - on failure
         """
         try:
-            history_text, rewritten_question, is_first_message = self._prepare(
+            history_text, rewritten_question, is_first_message = await self._prepare(
                 request=request,
                 user_id=user_id,
             )
@@ -193,15 +194,15 @@ class ChatService:
 
             full_answer = ""
 
-            for token in token_stream:
+            async for token in token_stream:
                 full_answer += token
-                yield f"data: {token}\n\n"
+                yield f"data: {json.dumps({'content': token})}\n\n"
 
             # Persist messages after stream completes
-            self._persist(request=request, answer=full_answer)
+            await self._persist(request=request, answer=full_answer)
 
             # Auto-title on first message (non-blocking: stream is already done)
-            self._maybe_set_title(
+            await self._maybe_set_title(
                 request=request,
                 is_first_message=is_first_message,
             )

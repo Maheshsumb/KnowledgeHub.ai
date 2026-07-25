@@ -1,5 +1,4 @@
 from uuid import UUID, uuid4
-from app.services.ingestion.loader_service import DocumentLoaderService
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

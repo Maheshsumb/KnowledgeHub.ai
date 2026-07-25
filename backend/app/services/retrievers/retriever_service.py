@@ -30,7 +30,7 @@ class RetrieverService:
             query_embedding=query_embedding,
             k=request.top_k,
             where={
-                "workspace_id": request.workspace_id
+                "workspace_id": str(request.workspace_id)
             },
         )
 

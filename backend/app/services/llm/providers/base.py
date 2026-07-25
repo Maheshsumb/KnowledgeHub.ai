@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterator
+from typing import Iterator, AsyncIterator
 
 
 class BaseLLMProvider(ABC):
@@ -12,8 +12,8 @@ class BaseLLMProvider(ABC):
         pass
 
     @abstractmethod
-    def stream(
+    async def stream(
         self,
         prompt: str,
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
         pass

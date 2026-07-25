@@ -26,14 +26,14 @@ router = APIRouter(
     response_model=ConversationResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_conversation(
+async def create_conversation(
     request: ConversationCreate,
     current_user: User = Depends(get_current_user),
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.create_conversation(
+    return await service.create_conversation(
         user_id=current_user.id,
         request=request,
     )
@@ -43,7 +43,8 @@ def create_conversation(
     "",
     response_model=list[ConversationResponse],
 )
-def list_conversations(
+async def list_conversations(
+    workspace_id: UUID | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
@@ -51,8 +52,9 @@ def list_conversations(
         get_conversation_service,
     ),
 ):
-    return service.list_conversations(
+    return await service.list_conversations(
         user_id=current_user.id,
+        workspace_id=workspace_id,
         skip=skip,
         limit=limit,
     )
@@ -62,8 +64,9 @@ def list_conversations(
     "/search",
     response_model=list[ConversationResponse],
 )
-def search_conversations(
+async def search_conversations(
     query: str,
+    workspace_id: UUID | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
@@ -71,8 +74,9 @@ def search_conversations(
         get_conversation_service,
     ),
 ):
-    return service.search_conversations(
+    return await service.search_conversations(
         user_id=current_user.id,
+        workspace_id=workspace_id,
         query=query,
         skip=skip,
         limit=limit,
@@ -83,13 +87,13 @@ def search_conversations(
     "/{conversation_id}",
     response_model=ConversationResponse,
 )
-def get_conversation(
+async def get_conversation(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.get_conversation(
+    return await service.get_conversation(
         conversation_id=conversation_id,
     )
 
@@ -98,7 +102,7 @@ def get_conversation(
     "/{conversation_id}/title",
     response_model=ConversationResponse,
 )
-def rename_conversation(
+async def rename_conversation(
     conversation_id: UUID,
     request: ConversationRename,
     service: ConversationService = Depends(
@@ -106,7 +110,7 @@ def rename_conversation(
     ),
 ):
     try:
-        return service.rename_conversation(
+        return await service.rename_conversation(
             conversation_id=conversation_id,
             request=request,
         )
@@ -118,13 +122,13 @@ def rename_conversation(
     "/{conversation_id}/favorite",
     response_model=ConversationResponse,
 )
-def favorite_conversation(
+async def favorite_conversation(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.favorite_conversation(
+    return await service.favorite_conversation(
         conversation_id=conversation_id,
     )
 
@@ -133,13 +137,13 @@ def favorite_conversation(
     "/{conversation_id}/archive",
     response_model=ConversationResponse,
 )
-def archive_conversation(
+async def archive_conversation(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.archive_conversation(
+    return await service.archive_conversation(
         conversation_id=conversation_id,
     )
 
@@ -148,13 +152,13 @@ def archive_conversation(
     "/{conversation_id}/restore",
     response_model=ConversationResponse,
 )
-def restore_conversation(
+async def restore_conversation(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.restore_conversation(
+    return await service.restore_conversation(
         conversation_id=conversation_id,
     )
 
@@ -163,13 +167,13 @@ def restore_conversation(
     "/{conversation_id}/stats",
     response_model=ConversationStats,
 )
-def get_conversation_stats(
+async def get_conversation_stats(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    return service.get_stats(
+    return await service.get_stats(
         conversation_id=conversation_id,
     )
 
@@ -178,16 +182,16 @@ def get_conversation_stats(
     "/{conversation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_conversation(
+async def delete_conversation(
     conversation_id: UUID,
     service: ConversationService = Depends(
         get_conversation_service,
     ),
 ):
-    service.delete_conversation(
+    await service.delete_conversation(
         conversation_id=conversation_id,
     )
 
     return Response(
         status_code=status.HTTP_204_NO_CONTENT,
-    )
+    )

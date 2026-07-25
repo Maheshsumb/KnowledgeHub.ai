@@ -24,28 +24,28 @@ router = APIRouter(
     response_model=MessageResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_message(
+async def create_message(
     request: MessageCreate,
     current_user: User = Depends(get_current_user),
     service: MessageService = Depends(
         get_message_service,
     ),
 ):
-    return service.create_message(request)
+    return await service.create_message(request)
 
 
 @router.get(
     "/{conversation_id}",
     response_model=list[MessageResponse],
 )
-def list_messages(
+async def list_messages(
     conversation_id: UUID,
     current_user: User = Depends(get_current_user),
     service: MessageService = Depends(
         get_message_service,
     ),
 ):
-    return service.list_messages(
+    return await service.list_messages(
         conversation_id,
     )
 
@@ -54,14 +54,14 @@ def list_messages(
     "/{conversation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_messages(
+async def delete_messages(
     conversation_id: UUID,
     current_user: User = Depends(get_current_user),
     service: MessageService = Depends(
         get_message_service,
     ),
 ):
-    service.delete_messages(
+    await service.delete_messages(
         conversation_id,
     )
 

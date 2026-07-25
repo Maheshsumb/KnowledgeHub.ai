@@ -176,10 +176,10 @@ class DocumentService:
             document.storage_path
         )
 
-        async with self.db.begin():
-            await self.document_repository.delete(
-                document
-            )
+        await self.document_repository.delete(
+            document
+        )
+        await self.db.commit()
 
     async def _process_document(
         self,

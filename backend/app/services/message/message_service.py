@@ -17,7 +17,7 @@ class MessageService:
     ):
         self.repository = repository
 
-    def create_message(
+    async def create_message(
         self,
         request: MessageCreate,
     ) -> Message:
@@ -28,61 +28,61 @@ class MessageService:
             content=request.content,
         )
 
-        return self.repository.create(
+        return await self.repository.create(
             message
         )
 
-    def list_messages(
+    async def list_messages(
         self,
         conversation_id: UUID,
     ) -> list[Message]:
 
-        return self.repository.list_by_conversation(
+        return await self.repository.list_by_conversation(
             conversation_id
         )
 
-    def delete_messages(
+    async def delete_messages(
         self,
         conversation_id: UUID,
     ) -> None:
 
-        self.repository.delete_all(
+        await self.repository.delete_all(
             conversation_id
         )
-    def save_user_message(
-    self,
-    conversation_id: UUID,
-    content: str,
-):
-        return self.create_message(
-            MessageCreate(
-            conversation_id=conversation_id,
-            role="user",
-            content=content,
-        )
-    )
-
-
-    def save_assistant_message(
+        
+    async def save_user_message(
         self,
         conversation_id: UUID,
         content: str,
     ):
-        return self.create_message(
+        return await self.create_message(
             MessageCreate(
-            conversation_id=conversation_id,
-            role="assistant",
-            content=content,
+                conversation_id=conversation_id,
+                role="user",
+                content=content,
+            )
         )
-    )
 
-    def get_history(
+    async def save_assistant_message(
+        self,
+        conversation_id: UUID,
+        content: str,
+    ):
+        return await self.create_message(
+            MessageCreate(
+                conversation_id=conversation_id,
+                role="assistant",
+                content=content,
+            )
+        )
+
+    async def get_history(
         self,
         conversation_id: UUID,
         limit: int = 10,
     ) -> list[Message]:
 
-        return self.repository.list_recent_messages(
+        return await self.repository.list_recent_messages(
             conversation_id=conversation_id,
             limit=limit,
         )

@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterator, AsyncIterator
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -11,7 +11,7 @@ class GeminiProvider(BaseLLMProvider):
     def __init__(self):
 
         self.model = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini-3.5-flash-lite",
             temperature=0,
             api_key=settings.GOOGLE_API_KEY,
         )
@@ -26,15 +26,35 @@ class GeminiProvider(BaseLLMProvider):
     ) -> str:
 
         response = self.model.invoke(prompt)
+        content = response.content
 
-        return response.content
+        if isinstance(content, list):
+            # Extract text from blocks
+            text_parts = []
+            for block in content:
+                if isinstance(block, str):
+                    text_parts.append(block)
+                elif isinstance(block, dict) and "text" in block:
+                    text_parts.append(block["text"])
+            return "".join(text_parts)
 
-    def stream(
+        return str(content)
+
+    async def stream(
         self,
         prompt: str,
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
 
-        for chunk in self.model.stream(prompt):
+        async for chunk in self.model.astream(prompt):
             content = chunk.content
-            if content:
-                yield content
+            if not content:
+                continue
+                
+            if isinstance(content, list):
+                for block in content:
+                    if isinstance(block, str):
+                        yield block
+                    elif isinstance(block, dict) and "text" in block:
+                        yield block["text"]
+            else:
+                yield str(content)

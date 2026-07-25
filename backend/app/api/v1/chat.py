@@ -20,7 +20,7 @@ router = APIRouter(
     status_code=200,
     response_model=ChatResponse,
 )
-def chat(
+async def chat(
     request: ChatRequest,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
@@ -28,7 +28,7 @@ def chat(
         get_chat_service,
     ),
 ):
-    response, is_first_message = chat_service.chat(
+    response, is_first_message = await chat_service.chat(
         request=request,
         user_id=current_user.id,
         background_title=True,
@@ -49,7 +49,7 @@ def chat(
     status_code=200,
     summary="Stream a chat response via Server-Sent Events",
 )
-def stream_chat(
+async def stream_chat(
     request: ChatRequest,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(
@@ -66,4 +66,4 @@ def stream_chat(
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
         },
-    )
+    )

@@ -1,5 +1,5 @@
 import time
-from typing import Iterator
+from typing import Iterator, AsyncIterator
 from uuid import UUID
 
 from app.schemas.chat import (
@@ -117,14 +117,14 @@ class RAGService:
             response_time_ms=int((time.time() - start_time) * 1000),
         )
 
-    def stream_answer(
+    async def stream_answer(
         self,
         question: str,
         workspace_id: UUID,
         top_k: int,
         history: str,
         rewritten_question: str | None = None,
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
         """
         Retrieve + build prompt, then stream the LLM response token by token.
         Yields raw string tokens only — SSE formatting is handled upstream.
@@ -137,4 +137,5 @@ class RAGService:
             rewritten_question=rewritten_question,
         )
 
-        return self.llm.stream(prompt=prompt)
+        async for chunk in self.llm.stream(prompt=prompt):
+            yield chunk

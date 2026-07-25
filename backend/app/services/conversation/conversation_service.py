@@ -17,7 +17,7 @@ class ConversationService:
     ):
         self.repository = repository
 
-    def create_conversation(
+    async def create_conversation(
         self,
         user_id: UUID,
         request: ConversationCreate,
@@ -29,14 +29,14 @@ class ConversationService:
             user_id=user_id,
         )
 
-        return self.repository.create(conversation)
+        return await self.repository.create(conversation)
 
-    def get_conversation(
+    async def get_conversation(
         self,
         conversation_id: UUID,
     ) -> Conversation:
 
-        conversation = self.repository.get_by_id(
+        conversation = await self.repository.get_by_id(
             conversation_id
         )
 
@@ -45,107 +45,111 @@ class ConversationService:
 
         return conversation
 
-    def verify_ownership(
+    async def verify_ownership(
         self,
         conversation_id: UUID,
         user_id: UUID,
         workspace_id: UUID,
     ) -> None:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         if conversation.user_id != user_id:
             raise ValueError("Conversation does not belong to the current user")
         if conversation.workspace_id != workspace_id:
             raise ValueError("Conversation does not belong to the supplied workspace")
 
-    def update_title(
+    async def update_title(
         self,
         conversation_id: UUID,
         title: str,
     ) -> Conversation:
 
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         conversation.title = title
 
-        return self.repository.update(conversation)
+        return await self.repository.update(conversation)
 
-    def list_conversations(
+    async def list_conversations(
         self,
         user_id: UUID,
+        workspace_id: UUID | None = None,
         skip: int = 0,
         limit: int = 20,
     ) -> list[Conversation]:
-        return self.repository.list_by_user(
+        return await self.repository.list_by_user(
             user_id=user_id,
+            workspace_id=workspace_id,
             skip=skip,
             limit=limit,
         )
 
-    def search_conversations(
+    async def search_conversations(
         self,
         user_id: UUID,
         query: str,
+        workspace_id: UUID | None = None,
         skip: int = 0,
         limit: int = 20,
     ) -> list[Conversation]:
-        return self.repository.search(
+        return await self.repository.search(
             user_id=user_id,
             query=query,
+            workspace_id=workspace_id,
             skip=skip,
             limit=limit,
         )
 
-    def rename_conversation(
+    async def rename_conversation(
         self,
         conversation_id: UUID,
         request: ConversationRename,
     ) -> Conversation:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         
         title = request.title.strip()
         if len(title) < 2 or len(title) > 100:
             raise ValueError("Conversation title must be between 2 and 100 characters")
 
         conversation.title = title
-        return self.repository.update(conversation)
+        return await self.repository.update(conversation)
 
-    def archive_conversation(
+    async def archive_conversation(
         self,
         conversation_id: UUID,
     ) -> Conversation:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         conversation.is_archived = True
-        return self.repository.update(conversation)
+        return await self.repository.update(conversation)
 
-    def favorite_conversation(
+    async def favorite_conversation(
         self,
         conversation_id: UUID,
     ) -> Conversation:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         # Toggle favoriting
         conversation.is_favorite = not conversation.is_favorite
-        return self.repository.update(conversation)
+        return await self.repository.update(conversation)
 
-    def restore_conversation(
+    async def restore_conversation(
         self,
         conversation_id: UUID,
     ) -> Conversation:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         conversation.is_deleted = False
         conversation.is_archived = False
-        return self.repository.update(conversation)
+        return await self.repository.update(conversation)
 
-    def delete_conversation(
+    async def delete_conversation(
         self,
         conversation_id: UUID,
     ) -> None:
-        conversation = self.get_conversation(conversation_id)
-        self.repository.delete(conversation)
+        conversation = await self.get_conversation(conversation_id)
+        await self.repository.delete(conversation)
 
-    def get_stats(
+    async def get_stats(
         self,
         conversation_id: UUID,
     ) -> dict:
-        conversation = self.get_conversation(conversation_id)
+        conversation = await self.get_conversation(conversation_id)
         
         messages_count = conversation.message_count
         
@@ -158,4 +162,4 @@ class ConversationService:
             "documents": 0,  # Placeholder unless citation tracking is added
             "tokens": tokens,
             "created_at": conversation.created_at,
-        }
+        }

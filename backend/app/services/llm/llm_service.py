@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterator, AsyncIterator
 
 from app.services.llm.providers.base import BaseLLMProvider
 
@@ -22,9 +22,10 @@ class LLMService:
 
         return self.provider.generate(prompt)
 
-    def stream(
+    async def stream(
         self,
         prompt: str,
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
 
-        return self.provider.stream(prompt)
+        async for chunk in self.provider.stream(prompt):
+            yield chunk
