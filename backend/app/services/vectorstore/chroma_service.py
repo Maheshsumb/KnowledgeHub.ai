@@ -66,13 +66,12 @@ class ChromaService(BaseVectorStore):
 
     def similarity_search(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         k: int = 5,
+        where: dict | None = None,
     ):
-
         return self.collection.query(
-            query_embeddings=[
-                query_embedding
-            ],
+            query_embeddings=[query_embedding],
             n_results=k,
+            where=where,
         )

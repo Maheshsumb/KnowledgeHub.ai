@@ -18,7 +18,8 @@ class BaseVectorStore(ABC):
     @abstractmethod
     def similarity_search(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         k: int = 5,
+        where: dict | None = None,
     ):
         pass

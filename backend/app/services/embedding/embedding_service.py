@@ -57,3 +57,10 @@ class EmbeddingService:
             )
 
         return results
+
+    def embed_query(
+    self,
+        query: str,
+    ) -> List[float]:
+        
+        return self.provider.embed_text(query)
