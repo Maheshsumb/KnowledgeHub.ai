@@ -17,5 +17,9 @@ class RetrievedChunk(BaseModel):
 
 
 class RetrievalResponse(BaseModel):
+
     query: str
+
+    confidence: float
+
     chunks: list[RetrievedChunk]

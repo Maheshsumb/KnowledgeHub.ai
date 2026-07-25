@@ -1,3 +1,4 @@
+from networkx.algorithms import distance_measures
 from app.schemas.retrieval import (
     RetrievalRequest,
     RetrievalResponse,
@@ -39,6 +40,16 @@ class RetrieverService:
         documents = result["documents"][0]
         metadatas = result["metadatas"][0]
         distances = result["distances"][0]
+        if distances:
+            confidence = max(0.0, min(1.0, 1 - distances[0]))
+        else:
+            confidence = 0.0
+        if not ids:
+            return RetrievalResponse(
+                query=request.query,
+                confidence=0.0,
+                chunks=[],
+            )   
 
         for chunk_id, document, metadata, distance in zip(
             ids,
@@ -55,8 +66,22 @@ class RetrieverService:
                     metadata=metadata,
                 )
             )
+        unique_chunks = []
+        seen = set()
 
+        for chunk in chunks:
+            key = (
+                chunk.document_id,
+                chunk.content   ,
+            )
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+            unique_chunks.append(chunk)
         return RetrievalResponse(
-            query=request.query,
-            chunks=chunks,
+         query=request.query,
+            confidence=confidence,
+            chunks=unique_chunks,
         )
