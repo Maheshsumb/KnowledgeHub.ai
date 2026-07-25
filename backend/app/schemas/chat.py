@@ -1,12 +1,14 @@
 from pydantic import BaseModel
 from typing import Any
 from typing import Optional
+from uuid import UUID
 
 
 
 class ChatRequest(BaseModel):
+    workspace_id: UUID
+    conversation_id: UUID
     question: str
-    workspace_id: str
     top_k: int = 5
 
 

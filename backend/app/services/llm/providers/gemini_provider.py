@@ -1,3 +1,5 @@
+from typing import Iterator
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.services.llm.providers.base import BaseLLMProvider
@@ -26,3 +28,13 @@ class GeminiProvider(BaseLLMProvider):
         response = self.model.invoke(prompt)
 
         return response.content
+
+    def stream(
+        self,
+        prompt: str,
+    ) -> Iterator[str]:
+
+        for chunk in self.model.stream(prompt):
+            content = chunk.content
+            if content:
+                yield content
